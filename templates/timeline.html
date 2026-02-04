@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Timeline</title>
+    <style>
+        body
+        {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #a8e063, #f8ffae);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding-top: 80px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            border-bottom: 2px solid #ccc;
+            z-index: 1000;
+            padding-right: 100px;
+        }
+
+        .nav-left .nav-logo {
+            height: 65px;
+            cursor: pointer;
+        }
+
+        .lock-logo {
+            height: 35px;
+            cursor: pointer;
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-center a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 5px;
+        }
+
+        .nav-center a:hover {
+            background-color: #ddd;
+        }
+
+        .nav-right .lock-btn {
+            font-size: 24px;
+            text-decoration: none;
+            color: #333;
+            padding: 8px;
+            margin-right: 40px;
+        }
+
+        .nav-right .lock-btn:hover
+        {
+            color: red;
+        }
+
+        p
+        {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 30px;
+        }
+
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/dashboard" class="logo-link">
+            <img src="{{ url_for('static', filename='camera-icon.png') }}" class="nav-logo">
+        </a>
+    </div>
+
+    <div class="nav-center">
+        <p>Timeline</p>
+    </div>
+
+    <div class="nav-right">
+        <a href="/logout" class="lock-btn">
+            <img src="{{ url_for('static', filename='lock.png') }}" class="lock-logo">
+        </a>
+    </div>
+</nav>
+</body>
+</html>
