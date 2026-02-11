@@ -130,7 +130,7 @@ def upload_page():
 def upload():
 
     photo_name = request.form['photo_name']
-    file = request.files['photo']
+    file = request.files['file']
     # Prevent duplicate photo names in DB
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
