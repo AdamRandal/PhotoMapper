@@ -12,9 +12,6 @@ import io
 import urllib.request
 from PIL import Image, ExifTags
 
-
-
-
 app = Flask(__name__)
 app.secret_key = "secret-key"
 
@@ -399,7 +396,6 @@ def timeline_build():
     photos = [dict(r) for r in rows]
 
     return render_template("timeline.html", photos=photos)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
