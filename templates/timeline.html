@@ -3,104 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <title>Timeline</title>
-    <style>
-        body
-        {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to bottom right, #a8e063, #f8ffae);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding-top: 80px;
-        }
-
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-            border-bottom: 2px solid #ccc;
-            z-index: 1000;
-            padding-right: 100px;
-        }
-
-        .nav-left .nav-logo {
-            height: 65px;
-            cursor: pointer;
-        }
-
-        .lock-logo {
-            height: 35px;
-            cursor: pointer;
-        }
-
-        .nav-center {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-center a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 5px;
-        }
-
-        .nav-center a:hover {
-            background-color: #ddd;
-        }
-
-        .nav-right .lock-btn {
-            font-size: 24px;
-            text-decoration: none;
-            color: #333;
-            padding: 8px;
-            margin-right: 40px;
-        }
-
-        .nav-right .lock-btn:hover
-        {
-            color: red;
-        }
-
-        p
-        {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 5px;
-            font-size: 30px;
-        }
-
-    </style>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <nav class="navbar">
     <div class="nav-left">
-        <a href="/dashboard" class="logo-link">
+        <a href="/dashboard">
             <img src="{{ url_for('static', filename='camera-icon.png') }}" class="nav-logo">
         </a>
     </div>
-
     <div class="nav-center">
         <p>Timeline</p>
     </div>
-
     <div class="nav-right">
         <a href="/logout" class="lock-btn">
             <img src="{{ url_for('static', filename='lock.png') }}" class="lock-logo">
         </a>
     </div>
 </nav>
+<div class="page-container">
+    {% if photos %}
+        <div id="map"></div>
+        <div class="cards">
+            {% for p in photos %}
+            <div class="timeline-card" id="card-{{ loop.index }}">
+                <div class="badge">{{ loop.index }}</div>
+                <img src="/{{ p.filepath }}" class="timeline-thumb">
+                <div class="meta">
+                    <p><strong>Name:</strong> {{ p.name }}</p>
+                    <p><strong>Date Taken:</strong> {{ p.taken_datetime or 'None' }}</p>
+                    <p><strong>Make:</strong> {{ p.make or 'Unknown' }}</p>
+                    <p><strong>Model:</strong> {{ p.model or 'Unknown' }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No images selected or no GPS data available.</p>
+    {% endif %}
+</div>
+<script>
+    {% if photos %}
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYXJhbmRhbCIsImEiOiJjbW05OHJ5ZjgwMGE5Mm9zN3c2MXZocTM5In0.c2WU30FIkdoAarNxaFC_vQ';
+    const photos = {{ photos | tojson }};
+    const coords = photos.map(p => [p.gps_lon, p.gps_lat]);
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: coords[0],
+        zoom: 10
+    });
+    map.on('load', () => {
+        map.addSource('route', {
+            type: 'geojson',
+            data: {
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: coords
+                }
+            }
+        });
+        map.addLayer({
+            id: 'route-line',
+            type: 'line',
+            source: 'route',
+            paint: {
+                'line-color': '#000000',
+                'line-width': 4
+            }
+        });
+        map.addLayer({
+            id: 'route-arrows',
+            type: 'symbol',
+            source: 'route',
+            layout: {
+                'symbol-placement': 'line',
+                'symbol-spacing': 80,
+                'icon-image': 'triangle-11',
+                'icon-size': 1.2
+            },
+            paint: {
+                'icon-color': '#000000'
+            }
+        });
+        photos.forEach((p, index) => {
+            const el = document.createElement('div');
+            el.className = 'marker';
+            el.innerText = index + 1;
+
+            Object.assign(el.style, {
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: 'black',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+            });
+            el.addEventListener('click', () => {
+                document.getElementById(`card-${index + 1}`)
+                    .scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+            new mapboxgl.Marker(el)
+                .setLngLat([p.gps_lon, p.gps_lat])
+                .addTo(map);
+        });
+        const bounds = new mapboxgl.LngLatBounds();
+        coords.forEach(c => bounds.extend(c));
+        map.fitBounds(bounds, { padding: 40 });
+    });
+    {% endif %}
+</script>
 </body>
 </html>

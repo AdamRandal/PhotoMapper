@@ -1,0 +1,334 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom right, #a8e063, #f8ffae);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+    padding-top: 80px;
+}
+body.upload-page {
+    padding-top: 120px; /* restores original spacing */
+}
+.center { text-align: center; }
+.clickable { cursor: pointer; }
+.error { color: red; }
+.success { color: green; }
+
+/*NAVBAR*/
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+    border-bottom: 2px solid #ccc;
+    z-index: 1000;
+    padding-right: 100px;
+}
+.nav-logo {
+    height: 65px;
+    cursor: pointer;
+}
+.lock-logo {
+    height: 35px;
+    cursor: pointer;
+}
+.nav-center {
+    display: flex;
+    gap: 30px;
+}
+.nav-center a,
+.nav-center p {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+.nav-center a:hover {
+    background-color: #ddd;
+}
+.lock-btn {
+    font-size: 24px;
+    text-decoration: none;
+    color: #333;
+    padding: 8px;
+    margin-right: 40px;
+}
+.lock-btn:hover {
+    color: red;
+}
+/*LOGIN PAGE*/
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 550px;
+    margin: auto;
+    margin-top: 120px;
+}
+.login-container img {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    margin-bottom: 20px;
+}
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.login-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.label {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    color: #777;
+    font-size: 20px;
+}
+/*CONTAINERS*/
+
+.container {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    width: 90%;
+    margin: auto;
+    height: auto;
+}
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    max-height: 100%;
+    overflow-y: auto;
+    text-align: center;
+    vertical-align: middle;
+}
+/*TABLES*/
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid black;
+}
+td, th {
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+}
+th {
+    position: sticky;
+    top: 0;
+    background: #f0f0f0;
+    z-index: 2;
+    height: 40px;
+    border: 2px solid #ccc;
+    cursor: pointer;
+}
+/* UPLOAD PAGE*/
+
+.auth-container {
+    width: 75%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.auth-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 600;
+}
+.auth-button {
+    width: 20%;
+    padding: 10px;
+    background: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+form input[type="text"],
+form input[type="file"] {
+    width: 50%;
+    height: 30px;
+    display: block;
+    margin: 0 auto 15px auto;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+.file-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.file-button {
+    background: #0078d4;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.file-name {
+    font-size: 13px;
+    color: #555;
+}
+#file {
+    display: none;
+    left: -9999px;
+}
+/*TIMELINE SELECT PAGE*/
+
+.page-container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+.grid .card {
+    display: block;
+    text-align: center;
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    width: 100%;
+    will-change: transform;
+}
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    text-align: center;
+    content-visibility: auto;
+}
+.thumb {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    image-rendering: auto;
+}
+.submit-btn {
+    margin-top: 25px;
+    padding: 12px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.submit-btn:hover {
+    background: #333;
+}
+/*TIMELINE PAGE*/
+
+#map {
+    width: 100%;
+    height: 400px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    margin-bottom: 25px;
+}
+.cards {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    overflow-x: hidden;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    text-align: center;
+    content-visibility: auto;
+}
+.timeline-card {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    overflow: hidden;
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+.badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: black;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 12px;
+}
+.timeline-thumb {
+    width: 220px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+.meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.meta p {
+    margin: 2px 0;
+    font-size: 13px;
+}

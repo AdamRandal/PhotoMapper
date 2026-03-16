@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Images for Timeline</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/dashboard">
+            <img src="{{ url_for('static', filename='camera-icon.png') }}" class="nav-logo">
+        </a>
+    </div>
+    <div class="nav-center">
+        <p>Select Images</p>
+    </div>
+    <div class="nav-right">
+        <a href="/logout" class="lock-btn">
+            <img src="{{ url_for('static', filename='lock.png') }}" class="lock-logo">
+        </a>
+    </div>
+</nav>
+<div class="page-container">
+    <form action="/timeline/build" method="POST">
+        <div class="grid">
+            {% for p in photos %}
+            <label class="card">
+                <img src="/{{ p.filepath }}" class="thumb" loading="lazy">
+                <p><strong>{{ p.name }}</strong></p>
+                <p>{{ p.taken_datetime or 'No date' }}</p>
+                <input type="checkbox" name="photo_ids" value="{{ p.id }}">
+            </label>
+            {% endfor %}
+        </div>
+        <button class="submit-btn" type="submit">Generate Timeline</button>
+    </form>
+</div>
+</body>
+</html>

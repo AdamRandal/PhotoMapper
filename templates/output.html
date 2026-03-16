@@ -1,19 +1,81 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <h2>Photo Details</h2>
-
-    <img src="/{{ data[3] }}" width="300"><br><br>
-
-    <p><strong>Name:</strong> {{ data[1] }}</p>
-    <p><strong>File Name:</strong> {{ data[2] }}</p>
-    <p><strong>Upload Time:</strong> {{ data[4] }}</p>
-    <p><strong>Date Taken:</strong> {{ data[5] }}</p>
-    <p><strong>Make:</strong> {{ data[6] }}</p>
-    <p><strong>Model:</strong> {{ data[7] }}</p>
-    <p><strong>GPS Latitude:</strong> {{ data[8] }}</p>
-    <p><strong>GPS Longitude:</strong> {{ data[9] }}</p>
-    <p><strong>SHA-256 Hash:</strong> {{ data[10] }}</p>
-
+<html lang="en">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+<head>
+    <meta charset="UTF-8">
+    <title>Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/dashboard" class="logo-link">
+            <img src="{{ url_for('static', filename='camera-icon.png') }}" class="nav-logo">
+        </a>
+    </div>
+    <div class="nav-center">
+        <form id="deleteForm" action="{{ url_for('delete_photo', name=data['name']) }}" method="POST" style="display:inline;">
+    <button type="button" onclick="confirmDelete()"
+        style="background:none; border:none; color:#333; font-weight:bold; cursor:pointer; padding:8px 16px; border-radius:5px;">
+        Delete
+    </button>
+</form>
+        <a href="{{ url_for('generate_report', name=data['name']) }}"
+   style="text-decoration:none; color:#333; font-weight:bold; padding:8px 16px; border-radius:5px;">
+   Report Download
+</a>
+    </div>
+    <div class="nav-right">
+        <a href="/logout" class="lock-btn">
+            <img src="{{ url_for('static', filename='lock.png') }}" class="lock-logo">
+        </a>
+    </div>
+</nav>
+<div class="container">
+    <div class="table-wrapper">
+        <h2>Photo Details</h2><br>
+        <img src="/{{ data[3] }}" width="500"><br><br>
+        <p><strong>Name:</strong> {{ data[1] }}</p>
+        <p><strong>File Name:</strong> {{ data[2] }}</p><br>
+        <p><strong>Upload Time:</strong> {{ data[4] }}</p>
+        <p><strong>Date Taken:</strong> {{ data[5] }}</p><br>
+        <p><strong>Make:</strong> {{ data[6] }}</p>
+        <p><strong>Model:</strong> {{ data[7] }}</p><br>
+        <p><strong>SHA-256 Hash:</strong> {{ data[10] }}</p><br>
+        <p><strong>GPS Latitude:</strong> {{ data[8] }}</p>
+        <p><strong>GPS Longitude:</strong> {{ data[9] }}</p>
+        <br>
+        {% if data["gps_lat"] and data["gps_lon"] %}
+            <h3>Location</h3><br>
+            <div id="map"></div>
+        {% else %}
+            <p>No GPS data found in this image.</p>
+        {% endif %}
+    </div>
+</div>
+<script>
+function confirmDelete() {
+    const confirmed = confirm("Are you sure you want to delete this photo? This cannot be undone.");
+    if (confirmed) {
+        document.getElementById("deleteForm").submit();
+    }
+}
+</script>
+<script>
+    {% if data["gps_lat"] and data["gps_lon"] %}
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYXJhbmRhbCIsImEiOiJjbW05OHJ5ZjgwMGE5Mm9zN3c2MXZocTM5In0.c2WU30FIkdoAarNxaFC_vQ';
+    const lat = {{ data["gps_lat"] }};
+    const lon = {{ data["gps_lon"] }};
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [lon, lat],
+        zoom: 12
+    });
+    new mapboxgl.Marker()
+        .setLngLat([lon, lat])
+        .addTo(map);
+    {% endif %}
+</script>
 </body>
 </html>

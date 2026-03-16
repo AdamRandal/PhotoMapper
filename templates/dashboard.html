@@ -3,100 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
-    <style>
-        body
-        {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to bottom right, #a8e063, #f8ffae);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding-top: 80px;
-        }
-
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-            border-bottom: 2px solid #ccc;
-            z-index: 1000;
-            padding-right: 100px;
-        }
-
-        .nav-left .nav-logo {
-            height: 65px;
-            cursor: pointer;
-        }
-
-        .lock-logo {
-            height: 35px;
-            cursor: pointer;
-        }
-
-        .nav-center {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-center a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 5px;
-        }
-
-        .nav-center a:hover {
-            background-color: #ddd;
-        }
-
-        .nav-right .lock-btn {
-            font-size: 24px;
-            text-decoration: none;
-            color: #333;
-            padding: 8px;
-            margin-right: 40px;
-        }
-
-        .nav-right .lock-btn:hover
-        {
-            color: red;
-        }
-
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            text-align: center;
-            width: 90%;
-            height: 80%;
-        }
-
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="dashboard-page">
 <nav class="navbar">
     <div class="nav-left">
         <a href="/dashboard" class="logo-link">
             <img src="{{ url_for('static', filename='camera-icon.png') }}" class="nav-logo">
         </a>
     </div>
-
     <div class="nav-center">
         <a href="/upload">Upload Image</a>
-        <a href="/timelines">Timelines</a>
+        <a href="/timeline/select">Timeline</a>
     </div>
-
     <div class="nav-right">
         <a href="/logout" class="lock-btn">
             <img src="{{ url_for('static', filename='lock.png') }}" class="lock-logo">
@@ -104,7 +23,74 @@
     </div>
 </nav>
 <div class="container">
-
+    <div class="table-wrapper">
+        <table id="photoTable" style="width:100%">
+            <tr>
+                <th onclick="sortTable(0)">Photo Name</th>
+                <th>Photo</th>
+                <th onclick="sortTable(2, true)">Date & Time Uploaded</th>
+                <th onclick="sortTable(3, true)">Date & Time Taken</th>
+            </tr>
+            {% for p in photos %}
+            <tr onclick="window.location='/output/{{ p['name'] }}'" style="cursor:pointer;">
+                <td>{{ p["name"] }}</td>
+                <td>
+                    <img src="{{ p['filepath'].replace('\\', '/') }}" height="100">
+                </td>
+                <td>{{ p["upload_datetime"] }}</td>
+                <td>{{ p["taken_datetime"] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div><br>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let sortDirections = {0: 'asc', 2: 'asc', 3: 'asc'};
+function parseCustomDate(dateStr) {
+    if (!dateStr || dateStr === "None") {
+        return null; // mark as missing
+    }
+    // EXIF format: YYYY:MM:DD HH:MM:SS
+    if (dateStr.includes(":") && dateStr.split(" ")[0].split(":").length === 3) {
+        const [datePart, timePart] = dateStr.split(" ");
+        const [year, month, day] = datePart.split(":");
+        return new Date(`${year}-${month}-${day}T${timePart}`);
+    }
+    // DD/MM/YYYY HH:MM:SS
+    if (dateStr.includes("/")) {
+        const [datePart, timePart] = dateStr.split(" ");
+        const [day, month, year] = datePart.split("/");
+        return new Date(`${year}-${month}-${day}T${timePart}`);
+    }
+    return new Date(dateStr);
+}
+    window.sortTable = function(colIndex, isDate=false) {
+        const table = document.getElementById("photoTable");
+        if (!table) return;
+        const rowsArray = Array.from(table.rows).slice(1);
+        const direction = sortDirections[colIndex] === 'asc' ? 1 : -1;
+    rowsArray.sort((rowA, rowB) => {
+    let a = rowA.cells[colIndex].innerText.trim();
+    let b = rowB.cells[colIndex].innerText.trim();
+    if (isDate) {
+        a = parseCustomDate(a);
+        b = parseCustomDate(b);
+        if (a === null && b === null) return 0;
+        if (a === null) return -1 * direction;
+        if (b === null) return 1 * direction;
+    } else {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+    }
+    if (a > b) return 1 * direction;
+    if (a < b) return -1 * direction;
+    return 0;
+});
+        rowsArray.forEach(row => table.tBodies[0].appendChild(row));
+        sortDirections[colIndex] = sortDirections[colIndex] === 'asc' ? 'desc' : 'asc';
+    };
+});
+</script>
 </body>
 </html>
