@@ -3,6 +3,3 @@ gunicorn
 piexif
 reportlab
 Pillow
-hashlib
-sqlite3
-reportlab
