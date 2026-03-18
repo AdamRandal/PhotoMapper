@@ -293,14 +293,30 @@ def generate_report(name):
     pdf.drawString(40, height - 65, f"Report Generated: {generated_time}")
 
     # Image
+    # -----------------------------
+    # IMAGE LOADING (Render-safe)
+    # -----------------------------
     try:
-        image_url = url_for('static', filename=f"uploads/{data['filename']}", _external=True)
-        img_bytes = io.BytesIO(urllib.request.urlopen(image_url).read())
-        oriented = Image.open(img_bytes)
-        oriented.save(img_bytes, format="JPEG")
-        img_bytes.seek(0)
-        img = ImageReader(img_bytes)
+        # If Render wiped the file, avoid infinite hang
+        if not os.path.exists(data["filepath"]):
+            raise FileNotFoundError("Image missing on Render filesystem")
 
+        # Build absolute URL for static file
+        image_url = url_for('static', filename=f"uploads/{data['filename']}", _external=True)
+
+        # Fetch image with timeout to prevent infinite loading
+        import requests
+        response = requests.get(image_url, timeout=5)
+        response.raise_for_status()
+
+        img_bytes = io.BytesIO(response.content)
+        oriented = Image.open(img_bytes)
+
+        # Convert to ImageReader
+        img_buffer = io.BytesIO()
+        oriented.save(img_buffer, format="JPEG")
+        img_buffer.seek(0)
+        img = ImageReader(img_buffer)
 
         pdf.drawImage(
             img,
@@ -311,8 +327,10 @@ def generate_report(name):
             preserveAspectRatio=True,
             anchor='nw'
         )
-    except:
-        pdf.drawString(40, height - 380, "(Image unavailable)")
+
+    except Exception as e:
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(40, height - 380, "(Image unavailable on server)")
 
     # Metadata (without hash)
     text_x = 420
