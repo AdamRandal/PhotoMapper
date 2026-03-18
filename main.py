@@ -16,7 +16,8 @@ import re
 app = Flask(__name__)
 app.secret_key = "secret-key"
 
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+os.makedirs('/tmp/uploads', exist_ok=True)
 
 PASSWORD = "forensic26"
 
@@ -297,22 +298,18 @@ def generate_report(name):
     # IMAGE LOADING (Render-safe)
     # -----------------------------
     try:
-        # If Render wiped the file, avoid infinite hang
-        if not os.path.exists(data["filepath"]):
-            raise FileNotFoundError("Image missing on Render filesystem")
+        # Determine correct file path
+        filepath = data["filepath"]
+        if not os.path.exists(filepath):
+            static_path = os.path.join("static/uploads", data["filename"])
+            if os.path.exists(static_path):
+                filepath = static_path
+            else:
+                raise FileNotFoundError("Image not found in /tmp or static/uploads")
 
-        # Build absolute URL for static file
-        image_url = url_for('static', filename=f"uploads/{data['filename']}", _external=True)
+        # Load the image directly from disk
+        oriented = load_oriented_image(filepath)
 
-        # Fetch image with timeout to prevent infinite loading
-        import requests
-        response = requests.get(image_url, timeout=5)
-        response.raise_for_status()
-
-        img_bytes = io.BytesIO(response.content)
-        oriented = Image.open(img_bytes)
-
-        # Convert to ImageReader
         img_buffer = io.BytesIO()
         oriented.save(img_buffer, format="JPEG")
         img_buffer.seek(0)
@@ -376,6 +373,11 @@ def generate_report(name):
         download_name=f"{data['name']}_report.pdf",
         mimetype="application/pdf"
     )
+
+@app.route('/tmp_uploads/<filename>')
+def tmp_uploads(filename):
+    return send_file(os.path.join('/tmp/uploads', filename))
+
 
 @app.route("/timeline/select")
 def timeline_select():
