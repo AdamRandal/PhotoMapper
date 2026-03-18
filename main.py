@@ -11,6 +11,7 @@ from reportlab.lib.units import mm
 import io
 import urllib.request
 from PIL import Image, ExifTags
+import re
 
 app = Flask(__name__)
 app.secret_key = "secret-key"
@@ -293,8 +294,9 @@ def generate_report(name):
 
     # Image
     try:
-        oriented = load_oriented_image(data["filepath"])
-        img_bytes = io.BytesIO()
+        image_url = url_for('static', filename=f"uploads/{data['filename']}", _external=True)
+        img_bytes = io.BytesIO(urllib.request.urlopen(image_url).read())
+        oriented = Image.open(img_bytes)
         oriented.save(img_bytes, format="JPEG")
         img_bytes.seek(0)
         img = ImageReader(img_bytes)
