@@ -301,6 +301,7 @@ def generate_report(name):
         img_bytes.seek(0)
         img = ImageReader(img_bytes)
 
+
         pdf.drawImage(
             img,
             40,
