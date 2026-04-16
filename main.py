@@ -16,7 +16,8 @@ import re
 app = Flask(__name__)
 app.secret_key = "secret-key"
 
-app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+os.makedirs('static/uploads', exist_ok=True)
 os.makedirs('/tmp/uploads', exist_ok=True)
 
 PASSWORD = "forensic26"
@@ -111,12 +112,13 @@ def format_exif_datetime(exif_str):
         return None
 
     try:
-        # EXIF format: YYYY:MM:DD HH:MM:SS
         dt = datetime.strptime(exif_str, "%Y:%m:%d %H:%M:%S")
         return dt.strftime("%d/%m/%Y %H:%M:%S")
     except:
-        return exif_str  # fallback if EXIF is weird
-
+        return exif_str
+# ---------------------------
+# Login
+# ---------------------------
 @app.route("/")
 def index():
     return redirect(url_for("login"))
@@ -134,7 +136,9 @@ def login():
         return redirect(url_for("login"))
 
     return render_template("login.html")
-
+# ---------------------------
+# Dashboard
+# ---------------------------
 @app.route("/dashboard")
 def dashboard():
     conn = sqlite3.connect('database.db')
@@ -145,12 +149,14 @@ def dashboard():
     conn.close()
     return render_template('dashboard.html', photos=photos)
 
-
+# Lock
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
+# ---------------------------
+# Upload
+# ---------------------------
 @app.route('/upload', methods=['GET'])
 def upload_page():
     return render_template('upload.html')
@@ -160,7 +166,6 @@ def upload():
 
     photo_name = request.form['photo_name']
     file = request.files['file']
-    # Prevent duplicate photo names in DB
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT id FROM photos WHERE name = ?", (photo_name,))
@@ -206,7 +211,9 @@ def upload():
         conn.close()
 
         return redirect(url_for('output_page', name=photo_name))
-
+# ---------------------------
+# Output
+# ---------------------------
 @app.route('/output/<name>')
 def output_page(name):
     conn = sqlite3.connect('database.db')
@@ -218,6 +225,7 @@ def output_page(name):
 
     return render_template('output.html', data=data)
 
+# Delete
 @app.route("/delete/<name>", methods=["POST"])
 def delete_photo(name):
     conn = sqlite3.connect('database.db')
@@ -266,6 +274,8 @@ def load_oriented_image(path):
         pass
     return img
 
+
+# Report
 @app.route("/report/<name>")
 def generate_report(name):
     conn = sqlite3.connect('database.db')
@@ -283,9 +293,6 @@ def generate_report(name):
     pdf = canvas.Canvas(buffer, pagesize=landscape(A4))
     width, height = landscape(A4)
 
-    # -----------------------------
-    # PAGE 1 — IMAGE + METADATA
-    # -----------------------------
     pdf.setFont("Helvetica-Bold", 24)
     pdf.drawString(40, height - 40, "Forensic Image Metadata Report")
 
@@ -293,12 +300,7 @@ def generate_report(name):
     generated_time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     pdf.drawString(40, height - 65, f"Report Generated: {generated_time}")
 
-    # Image
-    # -----------------------------
-    # IMAGE LOADING (Render-safe)
-    # -----------------------------
     try:
-        # Determine correct file path
         filepath = data["filepath"]
         if not os.path.exists(filepath):
             static_path = os.path.join("static/uploads", data["filename"])
@@ -307,7 +309,6 @@ def generate_report(name):
             else:
                 raise FileNotFoundError("Image not found in /tmp or static/uploads")
 
-        # Load the image directly from disk
         oriented = load_oriented_image(filepath)
 
         img_buffer = io.BytesIO()
@@ -329,7 +330,6 @@ def generate_report(name):
         pdf.setFont("Helvetica", 12)
         pdf.drawString(40, height - 380, "(Image unavailable on server)")
 
-    # Metadata (without hash)
     text_x = 420
     text_y = height - 120
 
@@ -356,7 +356,6 @@ def generate_report(name):
         pdf.drawString(text_x + 160, text_y, str(value))
         text_y -= 18
 
-    # HASH moved to bottom of page 1
     pdf.setFont("Helvetica-Bold", 12)
     pdf.drawString(40, 80, "SHA-256 Hash:")
     pdf.setFont("Helvetica", 12)
@@ -378,7 +377,9 @@ def generate_report(name):
 def tmp_uploads(filename):
     return send_file(os.path.join('/tmp/uploads', filename))
 
-
+# ---------------------------
+# Timeline
+# ---------------------------
 @app.route("/timeline/select")
 def timeline_select():
     conn = sqlite3.connect('database.db')

@@ -34,7 +34,7 @@
 <div class="container">
     <div class="table-wrapper">
         <h2>Photo Details</h2><br>
-        <img src="/{{ data[3] }}" width="500"><br><br>
+        <img src="{{ url_for('static', filename='uploads/' + data['filename']) }}" width="500"><br><br>
         <p><strong>Name:</strong> {{ data[1] }}</p>
         <p><strong>File Name:</strong> {{ data[2] }}</p><br>
         <p><strong>Upload Time:</strong> {{ data[4] }}</p>
